@@ -126,7 +126,6 @@ module Veewee
 
     # Class method to loading a definition
     def self.load(name, env)
-
       # Construct the path to the definition
 
       path = File.join(env.definition_dir, name)

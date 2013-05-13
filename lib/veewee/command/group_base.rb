@@ -200,6 +200,20 @@ module Veewee
         env.get_box(box_name).console_type(sequence.split(","))
       end
 
+
+      desc "extension [BOX_NAME] [SCRIPT_PATH]", "Run extension module in a box"
+      def extension(box_name, extension_file)
+        load extension_file
+        require 'pathname'
+        name = Pathname.new(extension_file).basename.sub_ext('').to_path
+        extension_module_name = name.split('_').collect {|name| name.capitalize }.join('')
+        extension_module = Object.const_get(extension_module_name)
+        box = env.get_box(box_name)
+        env.ui.info("Evaluating extension module #{extension_module_name} from #{extension_file} in box #{box_name}")
+        box.extend extension_module
+        box.run_extension
+      end
+
 protected
 
       # Override the basename to include the subcommand name.

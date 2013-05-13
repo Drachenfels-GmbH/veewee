@@ -3,8 +3,6 @@ module Veewee
   module Provider
     module  Core
       module BoxCommand
-
-
         def ssh(command=nil,options={})
 
           raise Veewee::Error,"Box is not running" unless self.running?
