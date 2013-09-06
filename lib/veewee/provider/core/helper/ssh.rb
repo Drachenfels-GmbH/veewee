@@ -67,12 +67,20 @@ module Veewee
 
             defaults={ :paranoid => false }
             options=defaults.merge(options)
+            download = options.delete(:download)
 
             Net::SSH.start( host,options[:user],options ) do |ssh|
               ui.info "Transferring #{filename} to #{destination} "
-              ssh.scp.upload!( filename, destination ) do |ch, name, sent, total|
-                #   print "\r#{destination}: #{(sent.to_f * 100 / total.to_f).to_i}%"
-                env.ui.info ".",{:new_line => false , :prefix => false}
+              if download
+                ssh.scp.download!( filename, destination ) do |ch, name, sent, total|
+                  #   print "\r#{destination}: #{(sent.to_f * 100 / total.to_f).to_i}%"
+                  env.ui.info ".",{:new_line => false , :prefix => false}
+                end
+              else
+                ssh.scp.upload!( filename, destination ) do |ch, name, sent, total|
+                  #   print "\r#{destination}: #{(sent.to_f * 100 / total.to_f).to_i}%"
+                  env.ui.info ".",{:new_line => false , :prefix => false}
+                end
               end
             end
             ui.info "", {:prefix => false}

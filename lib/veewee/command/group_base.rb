@@ -171,9 +171,14 @@ module Veewee
         env.get_box(box_name).issh(command)
       end
 
-      desc "copy [BOX_NAME] [SRC] [DST]", "Copy a file to the VM"
-      def copy(box_name, src, dst)
-        env.get_box(box_name).copy_to_box(src,dst)
+      desc "upload [BOX_NAME] [SRC] [DST]", "Upload a file to the VM"
+      def upload(box_name, src, dst = '/')
+        env.get_box(box_name).copy_to_box(src, dst, :download => false)
+      end
+
+      desc "download [BOX_NAME] [SRC] [DST]", "Download a file from the VM"
+      def download(box_name, src, dst = '.')
+        env.get_box(box_name).copy_to_box(src, dst, :download => true)
       end
 
       desc "undefine [BOX_NAME]", "Removes the definition of a basebox "
