@@ -32,20 +32,22 @@ module Veewee
             
           else
 
-            # Before we start,correct the ssh port if needed
-            forward=self.forwarding("guestssh")
-            guessed_port=guess_free_ssh_port(definition.ssh_host_port.to_i,definition.ssh_host_port.to_i+40).to_s
-            definition.ssh_host_port=guessed_port.to_s
-            
-            unless forward.nil?
-              if guessed_port!=forward[:host_port]
-                # Remove the existing one
-                self.delete_forwarding("guestssh")
-                env.ui.warn "Changing ssh port from #{forward[:host_port]} to #{guessed_port}"
-              self.add_ssh_nat_mapping
+            if definition.ssh?
+              # Before we start,correct the ssh port if needed
+              forward=self.forwarding("guestssh")
+              guessed_port=guess_free_ssh_port(definition.ssh_host_port.to_i,definition.ssh_host_port.to_i+40).to_s
+              definition.ssh_host_port=guessed_port.to_s
+
+              unless forward.nil?
+                if guessed_port!=forward[:host_port]
+                  # Remove the existing one
+                  self.delete_forwarding("guestssh")
+                  env.ui.warn "Changing ssh port from #{forward[:host_port]} to #{guessed_port}"
+                self.add_ssh_nat_mapping
+                end
+              else
+                self.add_ssh_nat_mapping
               end
-            else
-              self.add_ssh_nat_mapping
             end
             
           end

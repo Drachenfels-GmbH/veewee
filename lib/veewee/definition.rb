@@ -22,7 +22,7 @@ module Veewee
 
     attr_accessor :kickstart_port, :kickstart_ip, :kickstart_timeout, :kickstart_file
 
-    attr_accessor :ssh_login_timeout, :ssh_user, :ssh_password, :ssh_key, :ssh_host_port, :ssh_guest_port
+    attr_accessor :nossh, :ssh_login_timeout, :ssh_user, :ssh_password, :ssh_key, :ssh_host_port, :ssh_guest_port
 
     attr_accessor :winrm_login_timeout, :winrm_user, :winrm_password, :winrm_host_port, :winrm_guest_port
 
@@ -111,6 +111,8 @@ module Veewee
 
       @force_ssh_port = false
 
+      @nossh = false
+
       @params = {}
     end
 
@@ -172,6 +174,10 @@ module Veewee
       end
     end
 
+    def ssh?
+      ! @nossh
+    end
+
     def exists?
       filename = File.join(path, "definition.rb")
       unless File.exists?(filename)
@@ -194,7 +200,7 @@ module Veewee
 
       # Postinstall files require a valid user and password
       unless self.postinstall_files.nil?
-        if (self.ssh_user.nil? || self.ssh_password.nil?) && (self.winrm_user.nil? || self.winrm_password.nil?)
+        if (self.ssh? && (self.ssh_user.nil? || self.ssh_password.nil?)) && (self.winrm_user.nil? || self.winrm_password.nil?)
           return false
         end
       end

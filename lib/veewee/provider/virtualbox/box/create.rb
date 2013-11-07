@@ -62,12 +62,16 @@ module Veewee
             end
             self.add_winrm_nat_mapping
           else
-            guessed_port=guess_free_ssh_port(definition.ssh_host_port.to_i,definition.ssh_host_port.to_i+40).to_s
-            if guessed_port.to_s!=definition.ssh_host_port
-              env.ui.warn "Changing ssh port from #{definition.ssh_host_port} to #{guessed_port}"
-              definition.ssh_host_port=guessed_port.to_s
+            if definition.ssh?
+              guessed_port=guess_free_ssh_port(definition.ssh_host_port.to_i,definition.ssh_host_port.to_i+40).to_s
+              if guessed_port.to_s!=definition.ssh_host_port
+                env.ui.warn "Changing ssh port from #{definition.ssh_host_port} to #{guessed_port}"
+                definition.ssh_host_port=guessed_port.to_s
+              end
+              self.add_ssh_nat_mapping
+            else
+              env.ui.info "SSH is disabled. Skipping SSH port configuration and NAT mapping."
             end
-            self.add_ssh_nat_mapping
           end
 
         end

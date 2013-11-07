@@ -85,10 +85,12 @@ module Veewee
             :name => name
           })
 
-          # Type the boot sequence
-          Thread.new do
-            self.console_type(boot_sequence)
-            run_hook(:after_boot_sequence)
+          if definition.ssh?
+            Thread.new do
+              # Type the boot sequence
+              self.console_type(boot_sequence)
+              run_hook(:after_boot_sequence)
+            end
           end
 
           self.handle_kickstart(options)
@@ -101,18 +103,26 @@ module Veewee
             sleep 2
           end
 
-          if ! definition.skip_iso_transfer then
-            self.transfer_buildinfo(options)
+          if ! definition.ssh?
+            # Type the boot sequence
+            self.console_type(boot_sequence)
+            run_hook(:after_boot_sequence)
           end
 
-          # Transfer the VEEWEE_<params> environment variables + definition.params
-          # into .veewee_params
-          self.transfer_params(options)
+          if definition.ssh?
+            if ! definition.skip_iso_transfer then
+              self.transfer_buildinfo(options)
+            end
 
-          # Filtering post install files based upon --postinstall-include and --postinstall--exclude
-          definition.postinstall_files=filter_postinstall_files(options)
+            # Transfer the VEEWEE_<params> environment variables + definition.params
+            # into .veewee_params
+            self.transfer_params(options)
 
-          self.handle_postinstall(options)
+            # Filtering post install files based upon --postinstall-include and --postinstall--exclude
+            definition.postinstall_files=filter_postinstall_files(options)
+
+            self.handle_postinstall(options)
+          end
 
           run_hook(:after_postinstall)
 
@@ -121,7 +131,11 @@ module Veewee
           if (definition.winrm_user && definition.winrm_password)
             env.ui.info winrm_command_string
           else
-            env.ui.info ssh_command_string
+            if definition.ssh?
+              env.ui.info ssh_command_string
+            else
+              env.ui.info "SSH is disabled."
+            end
           end
 
           return self
